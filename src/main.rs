@@ -281,7 +281,7 @@ fn main() {
     println!("reading test pcb...");
 
     let contents =
-        fs::read_to_string("prova.kicad_pcb").expect("Something went wrong reading the file");
+        fs::read_to_string("C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/prova.kicad_pcb").expect("Something went wrong reading the file");
 
     let results = lexpr::from_str_custom(&contents, Options::kicad()).unwrap();
 
@@ -490,7 +490,7 @@ fn parse_segment(v: Vec<lexpr::Value>) -> Segment {
             "width" => seg.width = ev[1].as_f64().unwrap() as f32,
             "layer" => seg.layer = sym_or_str(ev.get(1)),
             "net" => seg.net = ev[1].as_u64().unwrap() as u32,
-            "tstamp" => seg.tstamp = ev[1].KiTsString(),
+            "tstamp" => seg.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in segment: {:#?}", value),
         }
     }
@@ -530,7 +530,7 @@ fn parse_via(v: Vec<lexpr::Value>) -> Via {
                 }
             }
             "net" => via.net = ev[1].as_u64().unwrap() as u32,
-            "tstamp" => via.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => via.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in via: {:#?}", value),
         }
     }
@@ -581,7 +581,7 @@ fn parse_gr_text(v: Vec<lexpr::Value>) -> GrText {
             "at" => grt.at = parse_vecf(ev),
             "layer" => grt.layer = sym_or_str(elem.get(1)),
             "effects" => grt.effects = parse_effects(ev),
-            "tstamp" => grt.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => grt.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in gr_text: {:#?}", elem),
         }
     }
@@ -621,7 +621,7 @@ fn parse_gr_circle(v: Vec<lexpr::Value>) -> GrCircle {
             }
             "layer" => grc.layer = sym_or_str(elem.get(1)),
             "width" => grc.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => grc.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => grc.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in gr_circle: {} {:#?}", label, elem),
         }
     }
@@ -661,7 +661,7 @@ fn parse_gr_line(v: Vec<lexpr::Value>) -> GrLine {
             }
             "layer" => grl.layer = sym_or_str(elem.get(1)),
             "width" => grl.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => grl.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => grl.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in gr_line: {:#?}", elem),
         }
     }
@@ -702,7 +702,7 @@ fn parse_gr_arc(v: Vec<lexpr::Value>) -> GrArc {
             "angle" => gra.angle = ev[1].as_f64().unwrap() as f32,
             "layer" => gra.layer = sym_or_str(elem.get(1)),
             "width" => gra.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => gra.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => gra.tstamp = String::from(ev[1].as_str().unwrap()),
             _ => println!("unknown cons in gr_arc: {:#?}", elem),
         }
     }
@@ -811,7 +811,7 @@ fn parse_zone(v: Vec<lexpr::Value>) -> Zone {
                     zone.layers.push(l.to_string())
                 }
             }
-            "tstamp" => zone.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => zone.tstamp =  String::from(ev[1].as_str().unwrap()),
             "hatch" => {
                 zone.hatch = (
                     ev[1].as_symbol().unwrap().to_string(),
