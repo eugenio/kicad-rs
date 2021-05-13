@@ -1,13 +1,13 @@
 [package]
 name = "kiparse-rs"
 version = "0.1.0"
-authors = ["Elen Eisendle <ln@calcifer.ee>"]
+authors = ["Elen Eisendle <ln@calcifer.ee>, Eugenio La Cava <fuzzywolf36@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-lexpr = {version = "0.2.5"}
+ [dependencies]
+ lexpr = {version = "0.2.5", path = 'C:\Users\eugen\OneDrive\Documenti\programmazione\rust\lexpr-rs\lexpr'}
 
-[patch.crates-io]
-lexpr = { git = 'https://github.com/tachiniererin/lexpr-rs', branch = 'kicad_pcb-sexp' }
+# [patch.crates-io]
+# lexpr = { git = 'https://github.com/eugenio/lexpr-rs', branch = 'kicad_pcb-sexp' }

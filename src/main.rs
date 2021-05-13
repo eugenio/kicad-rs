@@ -132,7 +132,7 @@ struct Module {
     name: String,
     layer: String,
     tedit: u32,
-    tstamp: u32,
+    tstamp: String,
     at: Vec<f32>,
     descr: String,
     tags: String,
@@ -153,7 +153,7 @@ struct GrText {
     at: Vec<f32>,
     layer: String,
     effects: Effects,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -162,7 +162,7 @@ struct GrCircle {
     end: (f32, f32),
     layer: String,
     width: f32,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -172,7 +172,7 @@ struct GrArc {
     angle: f32,
     layer: String,
     width: f32,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -181,7 +181,7 @@ struct GrLine {
     end: (f32, f32),
     layer: String,
     width: f32,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -191,7 +191,7 @@ struct Segment {
     layer: String,
     width: f32,
     net: u32,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -201,7 +201,7 @@ struct Via {
     drill: f32,
     layers: Vec<String>,
     net: u32,
-    tstamp: u32,
+    tstamp: String,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -247,7 +247,7 @@ struct Zone {
     net: u32,
     net_name: String,
     layers: Vec<String>,
-    tstamp: u32,
+    tstamp: String,
     priority: u8,
     hatch: (String, f32),
     connect_pads: (String, f32), // TODO: fix this
@@ -281,7 +281,7 @@ fn main() {
     println!("reading test pcb...");
 
     let contents =
-        fs::read_to_string("ferret.kicad_pcb").expect("Something went wrong reading the file");
+        fs::read_to_string("prova.kicad_pcb").expect("Something went wrong reading the file");
 
     let results = lexpr::from_str_custom(&contents, Options::kicad()).unwrap();
 
@@ -490,7 +490,7 @@ fn parse_segment(v: Vec<lexpr::Value>) -> Segment {
             "width" => seg.width = ev[1].as_f64().unwrap() as f32,
             "layer" => seg.layer = sym_or_str(ev.get(1)),
             "net" => seg.net = ev[1].as_u64().unwrap() as u32,
-            "tstamp" => seg.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => seg.tstamp = ev[1].KiTsString(),
             _ => println!("unknown cons in segment: {:#?}", value),
         }
     }
@@ -1105,7 +1105,7 @@ fn parse_module(v: Vec<lexpr::Value>) -> Module {
 
         match label.as_str() {
             "layer" => module.layer = sym_or_str(elem.get(1)),
-            "tstamp" => module.tstamp = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => module.tstamp = (ev[1].as_u64().unwrap() as u32).to_string(),
             "tedit" => module.tedit = ev[1].as_u64().unwrap() as u32,
             "at" => module.at = parse_vecf(ev),
             "descr" => module.layer = sym_or_str(elem.get(1)),
