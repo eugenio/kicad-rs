@@ -262,6 +262,7 @@ struct PCB {
     host: Host,
     general: General,
     page: String,
+    paper: String,
     layers: Vec<Layer>,
     setup: Setup,
     nets: Vec<Net>,
@@ -280,11 +281,13 @@ struct PCB {
 fn main() {
     println!("reading test pcb...");
 
-    let contents =
-        fs::read_to_string("C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/prova.kicad_pcb").expect("Something went wrong reading the file");
+    let contents = fs::read_to_string(
+        "C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/prova.kicad_pcb",
+    )
+    .expect("Something went wrong reading the file");
 
     let results = lexpr::from_str_custom(&contents, Options::kicad()).unwrap();
-
+    //println!("{:?}", results);
     // the pcb structure
     let pcb = results.as_pair().unwrap();
     let iter = pcb.1.list_iter().unwrap();
@@ -294,13 +297,15 @@ fn main() {
     for value in iter {
         let v = value.to_vec().unwrap();
         let sym = v.first().unwrap();
-
+        //println!("{:?}", v[1]);
         if !sym.is_cons() {
             let name = sym.to_string();
+            println!("Name is {:?} and value is {:?}", name, v[1]);
             match name.as_str() {
                 "version" => pcb.version = v[1].as_u64().unwrap(),
                 "general" => pcb.general = parse_general(v),
                 "page" => pcb.page = v[1].as_symbol().unwrap().to_string(),
+                "paper" => pcb.paper = v[1].as_symbol().unwrap().to_string(),
                 "layers" => pcb.layers = parse_layers(v),
                 "setup" => println!("setup {:#?}", v[1]),
                 "net" => pcb.nets.push(parse_net(v)),
@@ -321,7 +326,7 @@ fn main() {
         }
     }
 
-    // println!("{:#?}", pcb);
+    println!("{:#?}", pcb);
 }
 
 fn parse_general(v: Vec<lexpr::Value>) -> General {
@@ -811,7 +816,7 @@ fn parse_zone(v: Vec<lexpr::Value>) -> Zone {
                     zone.layers.push(l.to_string())
                 }
             }
-            "tstamp" => zone.tstamp =  String::from(ev[1].as_str().unwrap()),
+            "tstamp" => zone.tstamp = String::from(ev[1].as_str().unwrap()),
             "hatch" => {
                 zone.hatch = (
                     ev[1].as_symbol().unwrap().to_string(),

@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
  [dependencies]
- lexpr = {version = "0.2.5", path = 'C:\Users\eugen\OneDrive\Documenti\programmazione\rust\lexpr-rs\lexpr'}
+ lexpr = {version = "0.2.6", path = 'C:\Users\eugen\OneDrive\Documenti\programmazione\rust\lexpr-rs\lexpr'}
 
 # [patch.crates-io]
 # lexpr = { git = 'https://github.com/eugenio/lexpr-rs', branch = 'kicad_pcb-sexp' }
