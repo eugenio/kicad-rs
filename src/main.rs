@@ -282,7 +282,7 @@ fn main() {
     println!("reading test pcb...");
 
     let contents = fs::read_to_string(
-        "C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/prova.kicad_pcb",
+        "C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/ferret.kicad_pcb",
     )
     .expect("Something went wrong reading the file");
 
@@ -300,7 +300,7 @@ fn main() {
         //println!("{:?}", v[1]);
         if !sym.is_cons() {
             let name = sym.to_string();
-            println!("Name is {:?} and value is {:?}", name, v[1]);
+            //println!("Name is {:?} and value is {:?}", name, v[1]);
             match name.as_str() {
                 "version" => pcb.version = v[1].as_u64().unwrap(),
                 "general" => pcb.general = parse_general(v),
