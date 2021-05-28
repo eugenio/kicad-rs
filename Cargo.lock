@@ -18,7 +18,6 @@ dependencies = [
 [[package]]
 name = "lexpr"
 version = "0.2.6"
-source = "git+https://github.com/tachiniererin/lexpr-rs?branch=kicad_pcb-sexp#a24d8bf793c4ce70470fd16b2ba9fe554984d83d"
 dependencies = [
  "itoa",
  "lexpr-macros",
