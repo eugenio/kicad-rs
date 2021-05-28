@@ -24,7 +24,7 @@ struct Layer {
     num: u32,
     name: String,
     typ: String,
-    hidden: bool,
+    param4: String, // this changed in KiCad 6, but there's no documentation yet
 }
 
 #[derive(Debug, Default, Clone)]
@@ -131,7 +131,7 @@ struct Model {
 struct Module {
     name: String,
     layer: String,
-    tedit: u32,
+    tedit: String,
     tstamp: String,
     at: Vec<f32>,
     descr: String,
@@ -262,7 +262,6 @@ struct PCB {
     host: Host,
     general: General,
     page: String,
-    paper: String,
     layers: Vec<Layer>,
     setup: Setup,
     nets: Vec<Net>,
@@ -281,13 +280,11 @@ struct PCB {
 fn main() {
     println!("reading test pcb...");
 
-    let contents = fs::read_to_string(
-        "C:/Users/eugen/OneDrive/Documenti/programmazione/rust/kicad-rs/ferret.kicad_pcb",
-    )
-    .expect("Something went wrong reading the file");
+    let contents =
+        fs::read_to_string("ferret.kicad_pcb").expect("Something went wrong reading the file");
 
     let results = lexpr::from_str_custom(&contents, Options::kicad()).unwrap();
-    //println!("{:?}", results);
+
     // the pcb structure
     let pcb = results.as_pair().unwrap();
     let iter = pcb.1.list_iter().unwrap();
@@ -297,15 +294,13 @@ fn main() {
     for value in iter {
         let v = value.to_vec().unwrap();
         let sym = v.first().unwrap();
-        //println!("{:?}", v[1]);
+
         if !sym.is_cons() {
             let name = sym.to_string();
-            //println!("Name is {:?} and value is {:?}", name, v[1]);
             match name.as_str() {
                 "version" => pcb.version = v[1].as_u64().unwrap(),
                 "general" => pcb.general = parse_general(v),
                 "page" => pcb.page = v[1].as_symbol().unwrap().to_string(),
-                "paper" => pcb.paper = v[1].as_symbol().unwrap().to_string(),
                 "layers" => pcb.layers = parse_layers(v),
                 "setup" => println!("setup {:#?}", v[1]),
                 "net" => pcb.nets.push(parse_net(v)),
@@ -326,7 +321,7 @@ fn main() {
         }
     }
 
-    println!("{:#?}", pcb);
+    // println!("{:#?}", pcb);
 }
 
 fn parse_general(v: Vec<lexpr::Value>) -> General {
@@ -367,18 +362,10 @@ fn parse_layers(v: Vec<lexpr::Value>) -> Vec<Layer> {
         let mut l = Layer::default();
 
         l.num = p[0].as_u64().unwrap() as u32;
-        l.name = p[1].as_symbol().unwrap().to_string();
-        l.typ = p[2].as_symbol().unwrap().to_string();
+        l.name = sym_or_str(value.get(1));
+        l.typ = sym_or_str(value.get(2));
         if p.len() == 4 {
-            let hidden = p[3].as_symbol().unwrap();
-            if hidden == "hide" {
-                l.hidden = true
-            } else {
-                println!(
-                    "while parsing layer definitions: got {} instead of hide",
-                    hidden
-                )
-            }
+            l.param4 = sym_or_str(value.get(3));
         }
 
         layers.push(l);
@@ -495,7 +482,7 @@ fn parse_segment(v: Vec<lexpr::Value>) -> Segment {
             "width" => seg.width = ev[1].as_f64().unwrap() as f32,
             "layer" => seg.layer = sym_or_str(ev.get(1)),
             "net" => seg.net = ev[1].as_u64().unwrap() as u32,
-            "tstamp" => seg.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => seg.tstamp = sym_or_str(value.get(1)),
             _ => println!("unknown cons in segment: {:#?}", value),
         }
     }
@@ -535,7 +522,7 @@ fn parse_via(v: Vec<lexpr::Value>) -> Via {
                 }
             }
             "net" => via.net = ev[1].as_u64().unwrap() as u32,
-            "tstamp" => via.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => via.tstamp = sym_or_str(value.get(1)),
             _ => println!("unknown cons in via: {:#?}", value),
         }
     }
@@ -586,7 +573,7 @@ fn parse_gr_text(v: Vec<lexpr::Value>) -> GrText {
             "at" => grt.at = parse_vecf(ev),
             "layer" => grt.layer = sym_or_str(elem.get(1)),
             "effects" => grt.effects = parse_effects(ev),
-            "tstamp" => grt.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => grt.tstamp = sym_or_str(elem.get(1)),
             _ => println!("unknown cons in gr_text: {:#?}", elem),
         }
     }
@@ -626,7 +613,7 @@ fn parse_gr_circle(v: Vec<lexpr::Value>) -> GrCircle {
             }
             "layer" => grc.layer = sym_or_str(elem.get(1)),
             "width" => grc.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => grc.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => grc.tstamp = sym_or_str(elem.get(1)),
             _ => println!("unknown cons in gr_circle: {} {:#?}", label, elem),
         }
     }
@@ -666,7 +653,7 @@ fn parse_gr_line(v: Vec<lexpr::Value>) -> GrLine {
             }
             "layer" => grl.layer = sym_or_str(elem.get(1)),
             "width" => grl.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => grl.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => grl.tstamp = sym_or_str(elem.get(1)),
             _ => println!("unknown cons in gr_line: {:#?}", elem),
         }
     }
@@ -707,7 +694,7 @@ fn parse_gr_arc(v: Vec<lexpr::Value>) -> GrArc {
             "angle" => gra.angle = ev[1].as_f64().unwrap() as f32,
             "layer" => gra.layer = sym_or_str(elem.get(1)),
             "width" => gra.width = ev[1].as_f64().unwrap() as f32,
-            "tstamp" => gra.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => gra.tstamp = sym_or_str(elem.get(1)),
             _ => println!("unknown cons in gr_arc: {:#?}", elem),
         }
     }
@@ -816,7 +803,7 @@ fn parse_zone(v: Vec<lexpr::Value>) -> Zone {
                     zone.layers.push(l.to_string())
                 }
             }
-            "tstamp" => zone.tstamp = String::from(ev[1].as_str().unwrap()),
+            "tstamp" => zone.tstamp = sym_or_str(elem.get(1)),
             "hatch" => {
                 zone.hatch = (
                     ev[1].as_symbol().unwrap().to_string(),
@@ -1110,8 +1097,8 @@ fn parse_module(v: Vec<lexpr::Value>) -> Module {
 
         match label.as_str() {
             "layer" => module.layer = sym_or_str(elem.get(1)),
-            "tstamp" => module.tstamp = (ev[1].as_u64().unwrap() as u32).to_string(),
-            "tedit" => module.tedit = ev[1].as_u64().unwrap() as u32,
+            "tstamp" => module.tstamp = sym_or_str(elem.get(1)),
+            "tedit" => module.tedit = sym_or_str(elem.get(1)),
             "at" => module.at = parse_vecf(ev),
             "descr" => module.layer = sym_or_str(elem.get(1)),
             "tags" => module.tags = sym_or_str(elem.get(1)),
