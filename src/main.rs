@@ -321,7 +321,7 @@ fn main() {
         }
     }
 
-    // println!("{:#?}", pcb);
+    println!("{:#?}", pcb);
 }
 
 fn parse_general(v: Vec<lexpr::Value>) -> General {
